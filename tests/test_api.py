@@ -29,12 +29,12 @@ def test_create_and_get_swift_code(clean_db):
         "is_headquarter": True
     }
     
-    # Test tworzenia
+    
     response = client.post("/v1/swift-codes", json=test_data)
     assert response.status_code == 200
     assert response.json() == {"message": "SWIFT code created successfully"}
 
-    # Test pobierania
+    
     response = client.get("/v1/swift-codes/TESTCODEXXX")
     assert response.status_code == 200
     assert response.json()["swiftCode"] == "TESTCODEXXX"
@@ -51,14 +51,58 @@ def test_delete_swift_code(clean_db):
         "is_headquarter": True
     }
     
-    # Utwórz rekord
     client.post("/v1/swift-codes", json=test_data)
-    
-    # Test usuwania
+ 
     response = client.delete("/v1/swift-codes/TESTCODEXXX")
     assert response.status_code == 200
     assert response.json() == {"message": "SWIFT code deleted successfully"}
-    
-    # Weryfikacja usunięcia
+  
     response = client.get("/v1/swift-codes/TESTCODEXXX")
+    assert response.status_code == 404
+
+def test_get_country_swift_codes(clean_db):
+    
+    client.post("/v1/swift-codes", json={
+        "swift_code": "BANKPLPWXXX",
+        "bank_name": "Bank HQ",
+        "address": "Warsaw",
+        "country_iso2": "PL",
+        "country_name": "POLAND",
+        "is_headquarter": True
+    })
+    client.post("/v1/swift-codes", json={
+        "swift_code": "BANKPLPW001",
+        "bank_name": "Bank Branch",
+        "address": "Krakow",
+        "country_iso2": "PL",
+        "country_name": "POLAND",
+        "is_headquarter": False
+    })
+    
+    response = client.get("/v1/swift-codes/country/PL")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["countryISO2"] == "PL"
+    assert len(data["swiftCodes"]) == 2
+
+def test_create_duplicate_swift_code(clean_db):
+    test_data = {
+        "swift_code": "DUPLICATEXXX",
+        "bank_name": "Bank",
+        "address": "Address",
+        "country_iso2": "PL",
+        "country_name": "POLAND",
+        "is_headquarter": True
+    }
+    response1 = client.post("/v1/swift-codes", json=test_data)
+    assert response1.status_code == 200
+    response2 = client.post("/v1/swift-codes", json=test_data)
+    assert response2.status_code in [400, 409]
+
+def test_get_nonexistent_swift_code(clean_db):
+    response = client.get("/v1/swift-codes/NOTEXIST123")
+    assert response.status_code == 404
+
+def test_delete_nonexistent_swift_code(clean_db):
+    response = client.delete("/v1/swift-codes/NOTEXIST123")
     assert response.status_code == 404

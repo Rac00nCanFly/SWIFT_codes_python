@@ -9,10 +9,21 @@ class SwiftCodeBase(BaseModel):
     country_name: str
     is_headquarter: bool
 
-    # Konfiguracja camelCase dla JSON
+    class Config:
+        schema_extra = {
+            "example": {
+                "swiftCode": "BANKPLPWXXX",
+                "bankName": "Bank HQ",
+                "countryISO2": "PL",
+                "countryName": "POLAND",
+                "isHeadquarter": True,
+                "address": "Warsaw"
+            }
+        }
+    
     model_config = ConfigDict(
         alias_generator=to_camel,
-        populate_by_name=True,  # pozwala używać snake_case w Pythonie
+        populate_by_name=True,  
         from_attributes=True
     )
 

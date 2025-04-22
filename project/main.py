@@ -2,6 +2,8 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .database import SessionLocal, engine
 from . import models, schemas
+from project.cache import cache
+from project.monitoring import add_monitoring
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -15,6 +17,7 @@ def get_db():
         db.close()
 
 @app.get("/v1/swift-codes/{swift_code}", response_model=schemas.SwiftCodeResponse)
+@cache(expire=300)
 def get_swift_code(swift_code: str, db: Session = Depends(get_db)):
     db_swift = db.query(models.SwiftCode).filter(models.SwiftCode.swift_code == swift_code).first()
     if not db_swift:
@@ -55,3 +58,5 @@ def delete_swift_code(swift_code: str, db: Session = Depends(get_db)):
     db.delete(db_code)
     db.commit()
     return {"message": "SWIFT code deleted successfully"}
+
+add_monitoring(app)

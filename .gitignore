@@ -1,3 +1,4 @@
 .pytest_cache
 project/__pycache__
 tests/__pycache__
+.dockerignore

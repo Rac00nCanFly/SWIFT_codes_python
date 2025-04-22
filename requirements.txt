@@ -1,0 +1,9 @@
+fastapi==0.115.12
+uvicorn==0.29.0
+fastapi_redis_cache==0.2.5
+pandas==2.2.3
+pydantic==2.11.3
+pytest==8.3.4
+SQLAlchemy==2.0.37
+prometheus-client==0.20.0
+fastapi-prometheus-exporter==0.4.0
